@@ -1,0 +1,62 @@
+#!/bin/sh
+
+echo ""
+
+# Check for large files (over 10MB)
+large_files=$(git diff --cached --name-only --diff-filter=A | xargs -I {} sh -c 'if [ -f "{}" ]; then du -b "{}" | cut -f1; else echo 0; fi' | awk '$1 > 10485760')
+if [ ! -z "$large_files" ]; then
+    echo "Error: Files larger than 10MB detected!"
+    git diff --cached --name-only --diff-filter=A | while read file; do
+        if [ -f "$file" ]; then
+            size=$(du -b "$file" | cut -f1)
+            if [ $size -gt 10485760 ]; then
+                echo "  - $file ($(echo $size | awk '{print int($1/1024/1024)"MB"}'))"
+            fi
+        fi
+    done
+    echo "Please compress images or use Git LFS for large files."
+    exit 1
+fi
+
+# Check image naming convention
+invalid_names=$(git diff --cached --name-only --diff-filter=A | grep "^images/" | grep -v -E "^images/[0-9]{3}-[0-9]+x[0-9]+\.(png|jpg|jpeg)$")
+if [ ! -z "$invalid_names" ]; then
+    echo "Error: Invalid image naming convention detected!"
+    echo "$invalid_names" | while read file; do
+        echo "  - $file"
+    done
+    echo "Images should follow format: XXX-WIDTHxHEIGHT.extension"
+    echo "Example: 001-1920x1080.png"
+    exit 1
+fi
+
+# Check for supported image formats
+unsupported_formats=$(git diff --cached --name-only --diff-filter=A | grep "^images/" | grep -v -E "\.(png|jpg|jpeg)$")
+if [ ! -z "$unsupported_formats" ]; then
+    echo "Error: Unsupported image formats detected!"
+    echo "$unsupported_formats" | while read file; do
+        echo "  - $file"
+    done
+    echo "Only PNG, JPG, and JPEG formats are supported."
+    exit 1
+fi
+
+# Check minimum resolution (1920x1080)
+low_res_files=$(git diff --cached --name-only --diff-filter=A | grep "^images/" | grep -E "[0-9]{3}-[0-9]+x[0-9]+\.(png|jpg|jpeg)$" | while read file; do
+    resolution=$(echo "$file" | sed -n 's/.*-\([0-9]*\)x\([0-9]*\)\..*/\1x\2/p')
+    width=$(echo "$resolution" | cut -d'x' -f1)
+    height=$(echo "$resolution" | cut -d'x' -f2)
+    if [ "$width" -lt 1920 ] || [ "$height" -lt 1080 ]; then
+        echo "$file ($resolution)"
+    fi
+done)
+
+if [ ! -z "$low_res_files" ]; then
+    echo "Error: Images below minimum resolution (1920x1080) detected!"
+    echo "$low_res_files" | while read file; do
+        echo "  - $file"
+    done
+    exit 1
+fi
+
+exit 0

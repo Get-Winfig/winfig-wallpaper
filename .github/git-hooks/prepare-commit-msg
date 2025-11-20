@@ -1,0 +1,14 @@
+#!/bin/sh
+
+commit_file=$1
+commit_msg=$(cat $commit_file)
+
+# Check commit message length (first line should be ≤ 72 characters)
+first_line=$(echo "$commit_msg" | head -n1)
+if [ ${#first_line} -gt 72 ]; then
+    echo "Error: Commit message first line is too long (${#first_line} characters, max 72)"
+    echo "First line: $first_line"
+    exit 1
+fi
+
+exit 0
