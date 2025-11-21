@@ -1,6 +1,6 @@
 #  CI/CD Pipeline to build and publish Image Gallery app to Github Pages
 
-name: Publish Image Gallery App
+name: Build and Deploy Image Gallery App
 
 on:
   push:
@@ -17,12 +17,14 @@ permissions:
   id-token: write
 
 jobs:
-  build:
-    name: Build
+  build-and-commit:
+    name: Build and Commit to Deploy Branch
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -58,19 +60,12 @@ jobs:
         run: npm run build
         working-directory: ./app
 
-      - name: Upload build artifacts
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          path: ./app/dist
-
-  deploy:
-    name: Deploy to GitHub Pages
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./app/dist
+          publish_branch: gh-pages
+          commit_message: 'Deploy: ${{ github.event.head_commit.message }}'
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
