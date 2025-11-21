@@ -16,6 +16,82 @@ To use these wallpapers:
    - Or go to Settings → Personalization → Background
    - Select "Picture" and browse to your downloaded image
 
+## Development Scripts
+
+This repository includes utility scripts to help maintain the wallpaper collection:
+
+### 🔧 Image Renaming Script
+
+The rename script automatically standardizes image filenames to follow our naming convention.
+
+**Naming Convention:** `XXX-WIDTHxHEIGHT.extension` (e.g., `042-3840x2160.png`)
+
+#### Usage
+
+**Bash (Linux/Mac/WSL):**
+```bash
+chmod +x rename.sh
+./rename.sh
+```
+
+**PowerShell (Windows/Linux/Mac):**
+```powershell
+./rename.ps1
+```
+
+#### Features
+- Automatically detects image dimensions using ImageMagick
+- Only renames files that don't follow the standard format
+- Increments from the highest existing number
+- Prevents filename conflicts
+- Cross-platform compatibility
+
+#### Requirements
+- **ImageMagick** (`identify` command)
+  - Linux: `sudo apt-get install imagemagick` or `sudo pacman -S imagemagick`
+  - Mac: `brew install imagemagick`
+  - Windows: Download from [ImageMagick website](https://imagemagick.org/script/download.php)
+
+### 📄 JSON Generation Script
+
+The photos script generates a `photos.json` file containing metadata for all wallpapers.
+
+#### Usage
+
+**Bash:**
+```bash
+chmod +x photos.sh
+./photos.sh
+```
+
+#### Features
+- Generates structured JSON with image metadata
+- Includes direct GitHub raw URLs for each image
+- Validates filename format before processing
+- Extracts dimensions from filenames
+- URL-encodes filenames for web compatibility
+
+#### Requirements
+- **jq** (JSON processor)
+  - Linux: `sudo apt-get install jq` or `sudo pacman -S jq`
+  - Mac: `brew install jq`
+  - Windows: Download from [jq website](https://stedolan.github.io/jq/)
+
+#### Output Format
+```json
+{
+  "photos": [
+    {
+      "name": "001-1920x1080.png",
+      "src": "images/001-1920x1080.png",
+      "type": "png",
+      "resolution": "1920X1080",
+      "url": "https://raw.githubusercontent.com/Get-Winfig/winfig-wallpaper/main/images/001-1920x1080.png"
+    }
+  ]
+}
+```
+
 ## Copyright and Attribution
 
 **Important:** We respect intellectual property rights.
