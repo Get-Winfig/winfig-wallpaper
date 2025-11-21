@@ -1,0 +1,76 @@
+#  CI/CD Pipeline to build and publish Image Gallery app to Github Pages
+
+name: Publish Image Gallery App
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "app/**"
+      - "images/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: "./app/package-lock.json"
+
+      - name: Install Dependencies
+        run: npm install
+        working-directory: ./app
+
+      - name: Install ImageMagick
+        run: sudo apt-get update && sudo apt-get install -y imagemagick
+
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
+      - name: Build photos.json
+        run: |
+          if [ -f "./photos.sh" ]; then
+            bash ./photos.sh
+          else
+            echo '{"photos": []}' > photos.json
+          fi
+
+      - name: Copy photos.json to app directory
+        run: |
+          mkdir -p ./app/public
+          cp ./photos.json ./app/public/photos.json
+
+      - name: Build Application
+        run: npm run build
+        working-directory: ./app
+
+      - name: Upload build artifacts
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./app/dist
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
