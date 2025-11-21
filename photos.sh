@@ -51,7 +51,7 @@ if ! command -v jq &> /dev/null; then
 fi
 
 echo "Generating JSON..."
-echo "[]" > "${OUTPUT_FILE}.tmp"
+echo '{"photos": []}' > "${OUTPUT_FILE}.tmp"
 
 # Iterate files
 find . -maxdepth 1 -type f -print0 | sort -z | while IFS= read -r -d '' file; do
@@ -74,13 +74,13 @@ find . -maxdepth 1 -type f -print0 | sort -z | while IFS= read -r -d '' file; do
     ext="${name##*.}"
     ext=$(echo "$ext" | tr '[:upper:]' '[:lower:]')
 
-    # Add to JSON via JQ
+    # Add to JSON via JQ - update the photos array inside the object
     jq  --arg name "$name" \
         --arg src "images/$name" \
         --arg type "$ext" \
         --arg res "${width}X${height}" \
         --arg url "$full_url" \
-        '. + [{
+        '.photos += [{
             name: $name, src: $src, type: $type,
             resolution: $res, url: $url
         }]' "${OUTPUT_FILE}.tmp" > "${OUTPUT_FILE}.tmp.2" && mv "${OUTPUT_FILE}.tmp.2" "${OUTPUT_FILE}.tmp"

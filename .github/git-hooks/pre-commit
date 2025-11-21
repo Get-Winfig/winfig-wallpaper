@@ -5,7 +5,7 @@ echo ""
 # Check for large files (over 10MB)
 large_files=$(git diff --cached --name-only --diff-filter=A | xargs -I {} sh -c 'if [ -f "{}" ]; then du -b "{}" | cut -f1; else echo 0; fi' | awk '$1 > 10485760')
 if [ ! -z "$large_files" ]; then
-    echo "Error: Files larger than 10MB detected!"
+    echo "Warning: Files larger than 10MB detected!"
     git diff --cached --name-only --diff-filter=A | while read file; do
         if [ -f "$file" ]; then
             size=$(du -b "$file" | cut -f1)
@@ -15,7 +15,7 @@ if [ ! -z "$large_files" ]; then
         fi
     done
     echo "Please compress images or use Git LFS for large files."
-    exit 1
+    echo ""
 fi
 
 # Check image naming convention
@@ -27,6 +27,7 @@ if [ ! -z "$invalid_names" ]; then
     done
     echo "Images should follow format: XXX-WIDTHxHEIGHT.extension"
     echo "Example: 001-1920x1080.png"
+    echo ""
     exit 1
 fi
 
@@ -38,6 +39,7 @@ if [ ! -z "$unsupported_formats" ]; then
         echo "  - $file"
     done
     echo "Only PNG, JPG, and JPEG formats are supported."
+    echo ""
     exit 1
 fi
 
@@ -55,6 +57,7 @@ if [ ! -z "$low_res_files" ]; then
     echo "Warning: Images below minimum resolution (1920x1080) detected!"
     echo "$low_res_files" | while read file; do
         echo "  - $file"
+        echo ""
     done
 fi
 

@@ -28,45 +28,6 @@ function App() {
   const sidebarRef = useRef(null)
   const observer = useRef(null)
 
-  // Mock data for development
-  const mockPhotos = [
-    {
-      name: "001-1920x1080.png",
-      src: "images/001-1920x1080.png",
-      type: "png",
-      resolution: "1920X1080",
-      url: "https://picsum.photos/1920/1080?random=1"
-    },
-    {
-      name: "002-1920x1080.png",
-      src: "images/002-1920x1080.png",
-      type: "png",
-      resolution: "1920X1080",
-      url: "https://picsum.photos/1920/1080?random=2"
-    },
-    {
-      name: "003-1920x1080.png",
-      src: "images/003-1920x1080.png",
-      type: "png",
-      resolution: "1920X1080",
-      url: "https://picsum.photos/1920/1080?random=3"
-    },
-    {
-      name: "004-1920x1080.png",
-      src: "images/004-1920x1080.png",
-      type: "png",
-      resolution: "1920X1080",
-      url: "https://picsum.photos/1920/1080?random=4"
-    },
-    {
-      name: "005-1920x1080.png",
-      src: "images/005-1920x1080.png",
-      type: "png",
-      resolution: "1920X1080",
-      url: "https://picsum.photos/1920/1080?random=5"
-    }
-  ]
-
   // Intersection Observer for lazy loading thumbnails
   const createObserver = useCallback(() => {
     if (observer.current) observer.current.disconnect()
@@ -103,11 +64,12 @@ function App() {
           const data = await response.json()
           setPhotos(data.photos || [])
         } else {
-          setPhotos(mockPhotos)
+          console.error('Failed to load photos.json - status:', response.status)
+          setPhotos([])
         }
       } catch (error) {
-        console.warn('Could not load photos.json, using mock data')
-        setPhotos(mockPhotos)
+        console.error('Could not load photos.json:', error)
+        setPhotos([])
       }
       setLoading(false)
     }
