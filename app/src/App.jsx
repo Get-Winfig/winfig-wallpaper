@@ -98,7 +98,7 @@ function App() {
   useEffect(() => {
     const loadPhotos = async () => {
       try {
-        const response = await fetch('/photos.json')
+        const response = await fetch('./photos.json')
         if (response.ok) {
           const data = await response.json()
           setPhotos(data.photos || [])
