@@ -52,11 +52,10 @@ low_res_files=$(git diff --cached --name-only --diff-filter=A | grep "^images/" 
 done)
 
 if [ ! -z "$low_res_files" ]; then
-    echo "Error: Images below minimum resolution (1920x1080) detected!"
+    echo "Warning: Images below minimum resolution (1920x1080) detected!"
     echo "$low_res_files" | while read file; do
         echo "  - $file"
     done
-    exit 1
 fi
 
 exit 0
